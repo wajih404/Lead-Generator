@@ -49,9 +49,6 @@ async def receive_webhook(payload: WebhookPayload, db: Session = Depends(get_db)
     phone_number = message.get("phone_number")
     message_text = message.get("message_text")
 
-    # Step 2: Create lead object from message using your existing service
-    extracted_lead = create_lead_from_message(message)
-
     # Step 3: Find existing lead by phone number, otherwise create one
     db_lead = db.query(Lead).filter(Lead.phone_number == phone_number).first()
 
@@ -68,17 +65,14 @@ async def receive_webhook(payload: WebhookPayload, db: Session = Depends(get_db)
         db.commit()
         db.refresh(db_lead)
     else:
-        # Only update fields if new values exist
-        if extracted_lead.get("property_type"):
-            db_lead.property_type = extracted_lead.get("property_type")
-        if extracted_lead.get("location"):
-            db_lead.location = extracted_lead.get("location")
-        if extracted_lead.get("budget"):
-            db_lead.budget = extracted_lead.get("budget")
-        if extracted_lead.get("timeline"):
-            db_lead.timeline = extracted_lead.get("timeline")
-        if extracted_lead.get("status"):
-            db_lead.status = extracted_lead.get("status")
+        if not db_lead.property_type:
+            db_lead.property_type = message_text
+        elif not db_lead.location:
+            db_lead.location = message_text
+        elif not db_lead.budget:
+            db_lead.budget = message_text
+        elif not db_lead.timeline:
+            db_lead.timeline = message_text
 
         db.commit()
         db.refresh(db_lead)

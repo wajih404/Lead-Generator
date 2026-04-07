@@ -11,4 +11,4 @@ def get_next_question(lead: dict):
     if not lead.get("timeline"):
         return "When are you planning to buy the property?"
 
-    return None
+    return "Thanks! Let me get more details from you."
